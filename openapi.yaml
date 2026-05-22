@@ -1,0 +1,155 @@
+
+openapi: 3.0.0
+info:
+  title: API de Gerenciamento de Livros
+  version: 1.0.0
+  description: Uma API simples para gerenciar informações sobre livros.
+  contact:
+    name: Suporte API
+    email: suporte@livros.com
+servers:
+  - url: https://api.livros.com/v1
+    description: Servidor de Produção
+  - url: http://localhost:8080/v1
+    description: Servidor de Desenvolvimento Local
+tags:
+  - name: Livros
+    description: Operações relacionadas a livros
+paths:
+  /livros:
+    get:
+      summary: Obter todos os livros
+      description: Retorna uma lista completa de todos os livros cadastrados no sistema.
+      operationId: getAllLivros
+      tags:
+        - Livros
+      responses:
+        '200':
+          description: Uma lista de livros.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Livro'
+        '500':
+          description: Erro interno do servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Adicionar um novo livro
+      description: Cria um novo registro de livro com as informações fornecidas.
+      operationId: addLivro
+      tags:
+        - Livros
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovoLivro'
+      responses:
+        '201':
+          description: Livro criado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livro'
+        '400':
+          description: Requisição inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erro interno do servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /livros/{id}:
+    get:
+      summary: Obter um livro pelo ID
+      description: Retorna os detalhes de um livro específico baseado no seu identificador único.
+      operationId: getLivroById
+      tags:
+        - Livros
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID do livro a ser recuperado.
+      responses:
+        '200':
+          description: Detalhes do livro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livro'
+        '404':
+          description: Livro não encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erro interno do servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Livro:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        titulo:
+          type: string
+          example: O Senhor dos Anéis
+        autor:
+          type: string
+          example: J.R.R. Tolkien
+        anoPublicacao:
+          type: integer
+          example: 1954
+      required:
+        - id
+        - titulo
+        - autor
+        - anoPublicacao
+    NovoLivro:
+      type: object
+      properties:
+        titulo:
+          type: string
+          example: O Hobbit
+        autor:
+          type: string
+          example: J.R.R. Tolkien
+        anoPublicacao:
+          type: integer
+          example: 1937
+      required:
+        - titulo
+        - autor
+        - anoPublicacao
+    Error:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: '400'
+        mensagem:
+          type: string
+          example: Requisição inválida. Verifique os dados fornecidos.
+      required:
+        - codigo
+        - mensagem
