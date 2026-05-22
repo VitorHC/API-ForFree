@@ -1,0 +1,37 @@
+name: CI/CD da API OpenAPI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+      - name: Instalar Spectral
+        run: npm install -g @stoplight/spectral-cli
+      - name: Validar OpenAPI com Spectral
+        run: spectral lint openapi.yaml --format=github
+
+  publicar-docs:
+    runs-on: ubuntu-latest
+    needs: validar
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+      - name: Instalar Redoc CLI
+        run: npm install -g redoc-cli
+      - name: Gerar HTML da documentação
+        run: redoc-cli bundle openapi.yaml -o docs/index.html
+      - name: Publicar no GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
